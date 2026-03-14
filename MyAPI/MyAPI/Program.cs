@@ -36,6 +36,14 @@ builder.Services
         httpClient.BaseAddress = new Uri(options.BaseUrl, UriKind.Absolute);
         httpClient.Timeout = TimeSpan.FromSeconds(options.TimeoutSeconds);
     });
+
+builder.Services
+    .AddOptions<BinanceFuturesOptions>()
+    .Bind(builder.Configuration.GetSection(BinanceFuturesOptions.SectionName))
+    .Validate(options => Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out _), "BinanceFutures:BaseUrl must be a valid absolute URL.")
+    .ValidateOnStart();
+
+builder.Services.AddScoped<IBinanceFuturesService, BinanceFuturesService>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

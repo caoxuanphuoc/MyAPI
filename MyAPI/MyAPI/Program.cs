@@ -1,3 +1,7 @@
+using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using MyAPI.Configurations;
 using MyAPI.Contracts;
 using MyAPI.Infrastructure;
@@ -7,6 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "MyAPI",
+        Version = "v1",
+        Description = "API documentation for MyAPI services."
+    });
+});
 builder.Services
     .AddOptions<ExternalApiOptions>()
     .Bind(builder.Configuration.GetSection(ExternalApiOptions.SectionName))
@@ -45,14 +59,18 @@ builder.Services
 
 builder.Services.AddScoped<IBinanceFuturesService, BinanceFuturesService>();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "MyAPI v1");
+        options.RoutePrefix = "swagger";
+    });
 }
 
 app.UseHttpsRedirection();
